@@ -32,6 +32,12 @@ export const handleErrorsMiddleware = (
   if (err.type) {
     return res.status(serviceErrorToStatusCode[err.type]).send(err.message);
   }
+  if (err.file === "enum.c") {
+    return res.status(422).send(
+      `Send one of the following types: 
+        groceries, restaurants, transport, education, health`
+    );
+  }
 
   console.log(err);
   res.sendStatus(500);
