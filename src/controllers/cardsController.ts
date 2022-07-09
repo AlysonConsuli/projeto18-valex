@@ -23,3 +23,10 @@ export const getTransactions = async (req: Request, res: Response) => {
   const result = await cardsService.getTransactions(id);
   res.send(result);
 };
+
+export const blockCard = async (req: Request, res: Response) => {
+  const id: number = +req.params.id;
+  const { password }: { password: string } = req.body;
+  await cardsService.blockCard(id, password);
+  res.sendStatus(201);
+};

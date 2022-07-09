@@ -10,3 +10,7 @@ export const activateCardsSchema = Joi.object({
   cvc: Joi.number().required(),
   password: Joi.string().required().pattern(new RegExp("^[0-9]{4}$")),
 });
+
+export const cardPasswordSchema = Joi.object({
+  password: Joi.string().required().pattern(new RegExp("^[0-9]{4}$")),
+});

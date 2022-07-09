@@ -89,6 +89,26 @@ export const getTransactions = async (id: number) => {
   return { balance, transactionsFormated, rechargesFormated };
 };
 
+export const blockCard = async (id: number, password: string) => {
+  const card = await cardRepository.findById(id);
+  if (!card) {
+    throw notFoundError("Card not registered");
+  }
+  const expirationDate = formatDate(card.expirationDate);
+  if (dayjs().isAfter(expirationDate)) {
+    throw unauthorizedError("Expired card");
+  }
+  if (card.isBlocked) {
+    throw conflictError("The card is already blocked");
+  }
+  if (!bcrypt.compareSync(password, card.password)) {
+    throw unauthorizedError("Incorrect password");
+  }
+  await cardRepository.update(id, { isBlocked: true });
+};
+
+///// utils ////
+
 const formatName = (name: string) => {
   const fullname = name.toUpperCase().trim();
   const arr = fullname.split(" ").filter((str) => str.length >= 3);
