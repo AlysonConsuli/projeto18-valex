@@ -1,4 +1,3 @@
-import { faker } from "@faker-js/faker";
 import dayjs from "dayjs";
 import Cryptr from "cryptr";
 import bcrypt from "bcrypt";
@@ -14,6 +13,12 @@ import * as cardRepository from "../repositories/cardRepository.js";
 import * as employeeRepository from "../repositories/employeeRepository.js";
 import * as paymentRepository from "../repositories/paymentRepository.js";
 import * as rechargeRepository from "../repositories/rechargeRepository.js";
+import {
+  calculateAmount,
+  createCardInfos,
+  formatDate,
+  formatTimestamp,
+} from "../utils/cardUtils.js";
 
 export const createCard = async (
   apiKey: string,
@@ -124,51 +129,3 @@ export const unlockCard = async (id: number, password: string) => {
   }
   await cardRepository.update(id, { isBlocked: false });
 };
-
-///// utils ////
-
-const formatName = (name: string) => {
-  const fullname = name.toUpperCase().trim();
-  const arr = fullname.split(" ").filter((str) => str.length >= 3);
-  const cardNameArr = arr.map((str, i) => {
-    if (i !== 0 && i !== arr.length - 1) {
-      return str.substring(0, 1);
-    }
-    return str;
-  });
-  return cardNameArr.join(" ");
-};
-
-const createCardInfos = (name: string) => {
-  const cryptr = new Cryptr(process.env.CRYPTR_SECRET_KEY);
-  const cardNumber = faker.random.numeric(20);
-  const cardName = formatName(name);
-  const expirationDate = dayjs().add(5, "year").format("MM/YY");
-  const cvc = faker.random.numeric(3);
-  const encryptedCvc: string = cryptr.encrypt(cvc);
-  console.log(`cvc: ${cvc}`);
-  //const decryptedCvc = cryptr.decrypt(encryptedCvc);
-  return { cardNumber, cardName, expirationDate, encryptedCvc };
-};
-
-function formatDate(date: string) {
-  const arr = date.split("/").reverse();
-  arr[0] = `20${arr[0]}`;
-  return arr.join("/");
-}
-
-function calculateAmount(arr: any) {
-  const totalAmount = arr.reduce((total: number, obj: any) => {
-    const { amount } = obj;
-    return total + amount;
-  }, 0);
-  return totalAmount;
-}
-
-function formatTimestamp(arr: any) {
-  const arrFormated = arr.map((transaction: any) => {
-    const date = dayjs(transaction.timestamp).format("DD/MM/YYYY");
-    return { ...transaction, timestamp: date };
-  });
-  return arrFormated;
-}
