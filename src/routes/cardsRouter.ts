@@ -5,6 +5,7 @@ import {
   blockCard,
   createCard,
   getTransactions,
+  unlockCard,
 } from "../controllers/cardsController.js";
 import { validateSchema } from "../middlewares/schemaValidator.js";
 import {
@@ -25,5 +26,10 @@ cardsRouter.post(
   "/cards/block/:id",
   validateSchema(cardPasswordSchema),
   blockCard
+);
+cardsRouter.post(
+  "/cards/unlock/:id",
+  validateSchema(cardPasswordSchema),
+  unlockCard
 );
 export default cardsRouter;

@@ -94,6 +94,9 @@ export const blockCard = async (id: number, password: string) => {
   if (!card) {
     throw notFoundError("Card not registered");
   }
+  if (!bcrypt.compareSync(password, card.password)) {
+    throw unauthorizedError("Incorrect password");
+  }
   const expirationDate = formatDate(card.expirationDate);
   if (dayjs().isAfter(expirationDate)) {
     throw unauthorizedError("Expired card");
@@ -101,10 +104,25 @@ export const blockCard = async (id: number, password: string) => {
   if (card.isBlocked) {
     throw conflictError("The card is already blocked");
   }
+  await cardRepository.update(id, { isBlocked: true });
+};
+
+export const unlockCard = async (id: number, password: string) => {
+  const card = await cardRepository.findById(id);
+  if (!card) {
+    throw notFoundError("Card not registered");
+  }
   if (!bcrypt.compareSync(password, card.password)) {
     throw unauthorizedError("Incorrect password");
   }
-  await cardRepository.update(id, { isBlocked: true });
+  const expirationDate = formatDate(card.expirationDate);
+  if (dayjs().isAfter(expirationDate)) {
+    throw unauthorizedError("Expired card");
+  }
+  if (!card.isBlocked) {
+    throw conflictError("The card is already unlocked");
+  }
+  await cardRepository.update(id, { isBlocked: false });
 };
 
 ///// utils ////
