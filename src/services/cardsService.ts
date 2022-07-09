@@ -1,6 +1,7 @@
 import { faker } from "@faker-js/faker";
 import dayjs from "dayjs";
 import Cryptr from "cryptr";
+import bcrypt from "bcrypt";
 import "../config/setup.js";
 
 import {
@@ -45,7 +46,31 @@ export const createCard = async (
     type: type,
   };
   await cardRepository.insert(card);
-  console.log(card);
+};
+
+export const activateCard = async (
+  id: number,
+  cvc: number,
+  password: string
+) => {
+  const cryptr = new Cryptr(process.env.CRYPTR_SECRET_KEY);
+  const card = await cardRepository.findById(id);
+  if (!card) {
+    throw notFoundError("Card not registered");
+  }
+  const expirationDate = formatDate(card.expirationDate);
+  if (dayjs().isAfter(expirationDate)) {
+    throw unauthorizedError("Expired card");
+  }
+  if (card.password) {
+    throw conflictError("The card is already registered");
+  }
+  const decryptedCvc: number = +cryptr.decrypt(card.securityCode);
+  if (cvc !== decryptedCvc) {
+    throw unauthorizedError("Incorrect cvc");
+  }
+  const hashedPassword = bcrypt.hashSync(password, 10);
+  await cardRepository.update(id, { password: hashedPassword });
 };
 
 const formatName = (name: string) => {
@@ -64,9 +89,16 @@ const createCardInfos = (name: string) => {
   const cryptr = new Cryptr(process.env.CRYPTR_SECRET_KEY);
   const cardNumber = faker.random.numeric(20);
   const cardName = formatName(name);
-  const expirationDate = dayjs().add(5, "year").format("MM/YYYY");
+  const expirationDate = dayjs().add(5, "year").format("MM/YY");
   const cvc = faker.random.numeric(3);
-  const encryptedCvc = cryptr.encrypt(cvc);
+  const encryptedCvc: string = cryptr.encrypt(cvc);
+  console.log(`cvc: ${cvc}`);
   //const decryptedCvc = cryptr.decrypt(encryptedCvc);
   return { cardNumber, cardName, expirationDate, encryptedCvc };
 };
+
+function formatDate(date: string) {
+  const arr = date.split("/").reverse();
+  arr[0] = `20${arr[0]}`;
+  return arr.join("/");
+}
