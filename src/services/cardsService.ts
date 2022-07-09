@@ -12,6 +12,8 @@ import {
 import * as companyRepository from "../repositories/companyRepository.js";
 import * as cardRepository from "../repositories/cardRepository.js";
 import * as employeeRepository from "../repositories/employeeRepository.js";
+import * as paymentRepository from "../repositories/paymentRepository.js";
+import * as rechargeRepository from "../repositories/rechargeRepository.js";
 
 export const createCard = async (
   apiKey: string,
@@ -73,6 +75,20 @@ export const activateCard = async (
   await cardRepository.update(id, { password: hashedPassword });
 };
 
+export const getTransactions = async (id: number) => {
+  const card = await cardRepository.findById(id);
+  if (!card) {
+    throw notFoundError("Card not registered");
+  }
+  const transactions = await paymentRepository.findByCardId(id);
+  const recharges = await rechargeRepository.findByCardId(id);
+  const balance = calculateAmount(recharges) - calculateAmount(transactions);
+  const transactionsFormated = formatTimestamp(transactions);
+  const rechargesFormated = formatTimestamp(recharges);
+
+  return { balance, transactionsFormated, rechargesFormated };
+};
+
 const formatName = (name: string) => {
   const fullname = name.toUpperCase().trim();
   const arr = fullname.split(" ").filter((str) => str.length >= 3);
@@ -101,4 +117,20 @@ function formatDate(date: string) {
   const arr = date.split("/").reverse();
   arr[0] = `20${arr[0]}`;
   return arr.join("/");
+}
+
+function calculateAmount(arr: any) {
+  const totalAmount = arr.reduce((total: number, obj: any) => {
+    const { amount } = obj;
+    return total + amount;
+  }, 0);
+  return totalAmount;
+}
+
+function formatTimestamp(arr: any) {
+  const arrFormated = arr.map((transaction: any) => {
+    const date = dayjs(transaction.timestamp).format("DD/MM/YYYY");
+    return { ...transaction, timestamp: date };
+  });
+  return arrFormated;
 }

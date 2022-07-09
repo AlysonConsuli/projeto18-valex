@@ -17,3 +17,9 @@ export const activateCard = async (req: Request, res: Response) => {
   await cardsService.activateCard(id, cvc, password);
   res.sendStatus(201);
 };
+
+export const getTransactions = async (req: Request, res: Response) => {
+  const id: number = +req.params.id;
+  const result = await cardsService.getTransactions(id);
+  res.send(result);
+};
