@@ -34,8 +34,8 @@ export const rechargeCard = async (
   if (dayjs().isAfter(expirationDate)) {
     throw unauthorizedError("Expired card");
   }
-  if (card.isBlocked) {
-    throw unauthorizedError("The card is blocked");
+  if (!card.password) {
+    throw unauthorizedError("The card is inactive");
   }
   await rechargeRepository.insert({ cardId: id, amount });
 };
