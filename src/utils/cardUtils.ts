@@ -21,8 +21,7 @@ export const createCardInfos = (name: string) => {
   const expirationDate = dayjs().add(5, "year").format("MM/YY");
   const cvc = faker.random.numeric(3);
   const encryptedCvc: string = cryptr.encrypt(cvc);
-  console.log(`cvc: ${cvc}`);
-  return { cardNumber, cardName, expirationDate, encryptedCvc };
+  return { cardNumber, cardName, expirationDate, encryptedCvc, cvc };
 };
 
 export function formatDate(date: string) {

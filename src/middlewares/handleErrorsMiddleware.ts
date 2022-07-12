@@ -35,7 +35,7 @@ export const handleErrorsMiddleware = (
   if (err.file === "enum.c") {
     return res.status(422).send(
       `Send one of the following types: 
-        groceries, restaurants, transport, education, health`
+        groceries, restaurant, transport, education, health`
     );
   }
 

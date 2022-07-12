@@ -7,8 +7,8 @@ export const createCard = async (req: Request, res: Response) => {
   const apiKey = req.header("x-api-key");
   const id: number = +req.params.id;
   const type: cardRepository.TransactionTypes = req.body.type;
-  await cardsService.createCard(apiKey, id, type);
-  res.sendStatus(201);
+  const cvc = await cardsService.createCard(apiKey, id, type);
+  res.status(201).send(`cvc: ${cvc}`);
 };
 
 export const activateCard = async (req: Request, res: Response) => {

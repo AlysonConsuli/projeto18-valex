@@ -53,6 +53,7 @@ export const createCard = async (
     type: type,
   };
   await cardRepository.insert(card);
+  return cardInfos.cvc;
 };
 
 export const activateCard = async (
