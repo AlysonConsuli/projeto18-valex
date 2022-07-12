@@ -15,7 +15,7 @@ export const activateCard = async (req: Request, res: Response) => {
   const id: number = +req.params.id;
   const { cvc, password }: { cvc: number; password: string } = req.body;
   await cardsService.activateCard(id, cvc, password);
-  res.sendStatus(201);
+  res.sendStatus(200);
 };
 
 export const getTransactions = async (req: Request, res: Response) => {
@@ -28,12 +28,12 @@ export const blockCard = async (req: Request, res: Response) => {
   const id: number = +req.params.id;
   const { password }: { password: string } = req.body;
   await cardsService.blockCard(id, password);
-  res.sendStatus(201);
+  res.sendStatus(200);
 };
 
 export const unlockCard = async (req: Request, res: Response) => {
   const id: number = +req.params.id;
   const { password }: { password: string } = req.body;
   await cardsService.unlockCard(id, password);
-  res.sendStatus(201);
+  res.sendStatus(200);
 };
