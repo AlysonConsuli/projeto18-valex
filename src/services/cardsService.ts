@@ -100,6 +100,9 @@ export const blockCard = async (id: number, password: string) => {
   if (!card) {
     throw notFoundError("Card not registered");
   }
+  if (!card.password) {
+    throw unauthorizedError("The card is inactive");
+  }
   if (!bcrypt.compareSync(password, card.password)) {
     throw unauthorizedError("Incorrect password");
   }
@@ -117,6 +120,9 @@ export const unlockCard = async (id: number, password: string) => {
   const card = await cardRepository.findById(id);
   if (!card) {
     throw notFoundError("Card not registered");
+  }
+  if (!card.password) {
+    throw unauthorizedError("The card is inactive");
   }
   if (!bcrypt.compareSync(password, card.password)) {
     throw unauthorizedError("Incorrect password");
